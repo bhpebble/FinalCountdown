@@ -1,0 +1,23 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "bhardie",
+    "longName": "FinalCountdown",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "FinalCountdown",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "0942b610-3ef8-4435-9887-8b29c4c7a8ba",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
