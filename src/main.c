@@ -1,8 +1,23 @@
 #include <pebble.h>
+#include "arc.c"
+
+static const GPoint center = { 72, 84 };
 
 Window *main_window;
 TextLayer *bg_layer;
 TextLayer *time_layer;
+static Layer *draw_layer;
+
+int radius = 60;
+int thickness = 1;
+int start_angle = 0;
+int end_angle = 0;
+
+static void updateScreen(Layer *layer, GContext *ctx) {
+	//custom_draw_arc(ctx, center, radius, thickness, start_angle, end_angle, GColorDarkGray);
+	custom_draw_arc(ctx, center, radius, thickness*2+1, TRIG_MAX_ANGLE, TRIG_MAX_ANGLE/2, GColorPurple);
+  graphics_context_set_antialiased(ctx, true);
+}
 
 static void update_time() {
   // Get a tm structure
@@ -20,36 +35,44 @@ static void update_time() {
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
+  
+  if (units_changed & DAY_UNIT) {
+    layer_mark_dirty(draw_layer);
+	}
 }
 
 static void main_window_load(Window *window) {
   // Get information about the Window
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
-
-  // Create a black background
+  
+  // set up a black background
   bg_layer = text_layer_create(
     GRect(0, 0, bounds.size.w, bounds.size.h));
   text_layer_set_background_color(bg_layer, GColorBlack);
   layer_add_child(window_layer, text_layer_get_layer(bg_layer));
   
-  // Create the TextLayer with specific bounds
+  // set up time display layer
   time_layer = text_layer_create(
       GRect(0, 63, bounds.size.w, 36));
-
-  // Improve the layout to be more like a watchface
   text_layer_set_background_color(time_layer, GColorDarkGray);
   text_layer_set_text_color(time_layer, GColorWhite);
   text_layer_set_text(time_layer, "00:00");
   text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_LECO_28_LIGHT_NUMBERS));
   text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
-
-  // Add it as a child layer to the Window's root layer
   layer_add_child(window_layer, text_layer_get_layer(time_layer));
+  
+  // set up layer and draw initial ring
+  draw_layer = layer_create(GRect(0, 0, 144, 168));
+	layer_set_update_proc(draw_layer, updateScreen);
+	layer_add_child(window_layer, draw_layer);
+  layer_mark_dirty(draw_layer);
 }
 
 static void main_window_unload(Window *window) {
   text_layer_destroy(time_layer);
+  text_layer_destroy(bg_layer);
+  layer_destroy(draw_layer);
 }
 
 void handle_init(void) {
