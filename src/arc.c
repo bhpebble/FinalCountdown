@@ -4,9 +4,33 @@ static int angle_90 = TRIG_MAX_ANGLE / 4;
 static int angle_180 = TRIG_MAX_ANGLE / 2;
 static int angle_270 = 3 * TRIG_MAX_ANGLE / 4;
 
-/*\
-|*| DrawArc function thanks to Cameron MacFarland (http://forums.getpebble.com/profile/12561/Cameron%20MacFarland)
-\*/
+struct arc {
+  int num_slices;
+  int arc_offset;
+  int start_angle;
+  int end_angle;
+  int current_step;
+};
+
+static inline struct arc create_arc_config(int num_slices) {
+    struct arc config = {
+    .num_slices = num_slices,
+    .arc_offset = -TRIG_MAX_ANGLE / 4 - (TRIG_MAX_ANGLE / num_slices),
+    .start_angle = TRIG_MAX_ANGLE / num_slices,
+    .end_angle = TRIG_MAX_ANGLE / num_slices,
+    .current_step = 1
+  };
+  
+  return config;
+}
+
+static inline void increment_arc_config(struct arc *config, int steps) {
+  config->end_angle = config->start_angle * config->current_step;
+  config->current_step += steps; 
+}
+
+// Based on DrawArc function thanks to Cameron MacFarland (http://forums.getpebble.com/profile/12561/Cameron%20MacFarland)
+// and Jnmattern (https://github.com/Jnmattern/Arc)
 static inline void custom_draw_arc(GContext *ctx, GPoint center, int radius, int thickness, int start_angle, int end_angle, GColor c) {
 	int32_t xmin = 65535000, xmax = -65535000, ymin = 65535000, ymax = -65535000;
 	int32_t cosStart, sinStart, cosEnd, sinEnd;
@@ -119,4 +143,8 @@ static inline void custom_draw_arc(GContext *ctx, GPoint center, int radius, int
 			}
 		}
 	}
+}
+
+static inline void custom_draw_arc_from_config(GContext *ctx, GPoint center, int radius, int thickness, struct arc config, GColor c) {
+  custom_draw_arc(ctx, center, radius, thickness, config.start_angle + config.arc_offset, config.end_angle + config.arc_offset, c);
 }

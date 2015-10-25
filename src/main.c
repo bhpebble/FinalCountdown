@@ -3,13 +3,8 @@
 
 static const GPoint center = { 72, 84 };
 
-//TEMP
-//int const arc_slices = 10;
-int arc_start_angle = TRIG_MAX_ANGLE / 60;
-int arc_end_angle = TRIG_MAX_ANGLE / 60;
-int arc_cur_step = 1;
-
-int arc_offset = -TRIG_MAX_ANGLE / 4 - (TRIG_MAX_ANGLE / 60);
+struct arc counter_config;
+int arc_slices = 60;
 
 Window *main_window;
 TextLayer *bg_layer;
@@ -34,7 +29,7 @@ static void updateScreen(Layer *layer, GContext *ctx) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "TMA/4*3: %d", TRIG_MAX_ANGLE/4*3);
   
 	custom_draw_arc(ctx, center, radius, thickness, start_angle, end_angle, GColorDarkGray);
-	custom_draw_arc(ctx, center, radius+1, thickness*2+1, arc_start_angle + arc_offset, arc_end_angle + arc_offset, GColorPurple);
+	custom_draw_arc_from_config(ctx, center, radius+1, thickness*2+1, counter_config, GColorPurple);
   graphics_context_set_antialiased(ctx, true);
 }
 
@@ -61,15 +56,17 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	}
   
   if (units_changed & SECOND_UNIT) {
-    arc_end_angle = arc_start_angle * arc_cur_step;
-    arc_cur_step++;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "arc_end_angle END VALUE: %d", arc_end_angle);
+    increment_arc_config(&counter_config, 1);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "arc_end_angle END VALUE: %d", counter_config.end_angle);
     layer_mark_dirty(draw_layer);
   }
 }
 
 static void main_window_load(Window *window) {
-  // Get information about the Window
+  // set up arc config
+  counter_config = create_arc_config(arc_slices);
+  
+  // get information about the Window
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
   
