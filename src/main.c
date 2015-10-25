@@ -14,8 +14,8 @@ int start_angle = 0;
 int end_angle = 0;
 
 static void updateScreen(Layer *layer, GContext *ctx) {
-	//custom_draw_arc(ctx, center, radius, thickness, start_angle, end_angle, GColorDarkGray);
-	custom_draw_arc(ctx, center, radius, thickness*2+1, TRIG_MAX_ANGLE, TRIG_MAX_ANGLE/2, GColorPurple);
+	custom_draw_arc(ctx, center, radius, thickness, start_angle, end_angle, GColorDarkGray);
+	custom_draw_arc(ctx, center, radius+1, thickness*2+1, 0, TRIG_MAX_ANGLE/2, GColorPurple);
   graphics_context_set_antialiased(ctx, true);
 }
 
