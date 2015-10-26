@@ -24,9 +24,15 @@ static inline struct arc create_arc_config(int num_slices) {
   return config;
 }
 
-static inline void increment_arc_config(struct arc *config, int steps) {
+// useful for animating a filling arc based on timer ticks or other interactions
+static inline void increment_arc_step(struct arc *config, int steps) {
   config->end_angle = config->start_angle * config->current_step;
   config->current_step += steps; 
+}
+
+static inline void set_arc_step(struct arc *config, int step) {
+  config->end_angle = config->start_angle * config->current_step;
+  config->current_step = step; 
 }
 
 // Based on DrawArc function thanks to Cameron MacFarland (http://forums.getpebble.com/profile/12561/Cameron%20MacFarland)
@@ -146,5 +152,6 @@ static inline void custom_draw_arc(GContext *ctx, GPoint center, int radius, int
 }
 
 static inline void custom_draw_arc_from_config(GContext *ctx, GPoint center, int radius, int thickness, struct arc config, GColor c) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "CDAFC: %d, %d", config.start_angle + config.arc_offset, config.end_angle + config.arc_offset);
   custom_draw_arc(ctx, center, radius, thickness, config.start_angle + config.arc_offset, config.end_angle + config.arc_offset, c);
 }

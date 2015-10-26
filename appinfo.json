@@ -12,7 +12,8 @@
     "sdkVersion": "3",
     "shortName": "FinalCountdown",
     "targetPlatforms": [
-        "basalt"
+        "basalt",
+        "chalk"
     ],
     "uuid": "0942b610-3ef8-4435-9887-8b29c4c7a8ba",
     "versionLabel": "1.0",

@@ -4,7 +4,8 @@
 static const GPoint center = { 72, 84 };
 
 struct arc counter_config;
-int arc_slices = 60;
+time_t start_time = 1444633200/60/60/24;
+time_t end_time = 1449907200/60/60/24;
 
 Window *main_window;
 TextLayer *bg_layer;
@@ -12,24 +13,15 @@ TextLayer *time_layer;
 static Layer *draw_layer;
 
 int radius = 60;
-int thickness = 1;
+int lower_thickness = 1;
+int higher_thickness_multiple = 4;
 int start_angle = 0;
 int end_angle = 0;
 
-time_t start_time = 10;//1443657600/60/60/24;
-time_t end_time = 20;//1449878400/60/60/24;
 
 static void updateScreen(Layer *layer, GContext *ctx) {
-  int circ_range = end_time - start_time;
-  int now = 15;//time(NULL)/60/60/24;
-  int days_left = end_time - now;
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "range: %d", circ_range);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "now: %d", now);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "left: %d", days_left);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "TMA/4*3: %d", TRIG_MAX_ANGLE/4*3);
-  
-	custom_draw_arc(ctx, center, radius, thickness, start_angle, end_angle, GColorDarkGray);
-	custom_draw_arc_from_config(ctx, center, radius+1, thickness*2+1, counter_config, GColorPurple);
+	custom_draw_arc(ctx, center, radius, lower_thickness, start_angle, end_angle, GColorDarkGray);
+	custom_draw_arc_from_config(ctx, center, radius+2, lower_thickness*4+1, counter_config, GColorPurple);
   graphics_context_set_antialiased(ctx, true);
 }
 
@@ -47,23 +39,24 @@ static void update_time() {
   text_layer_set_text(time_layer, s_buffer);
 }
 
+static void update_counter() {
+  int current_time = time(NULL)/60/60/24;
+  int current_step = (int)current_time - (int)start_time;
+  set_arc_step(&counter_config, current_step);
+  
+  layer_mark_dirty(draw_layer);
+}
+
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "TICK!");
   update_time();
-  
-  if (units_changed & DAY_UNIT) {
-    layer_mark_dirty(draw_layer);
-	}
-  
-  if (units_changed & SECOND_UNIT) {
-    increment_arc_config(&counter_config, 1);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "arc_end_angle END VALUE: %d", counter_config.end_angle);
-    layer_mark_dirty(draw_layer);
-  }
+
+  // todo: update only on day change
+  update_counter();
 }
 
 static void main_window_load(Window *window) {
   // set up arc config
+  int arc_slices = (int)end_time - (int)start_time;
   counter_config = create_arc_config(arc_slices);
   
   // get information about the Window
@@ -79,28 +72,23 @@ static void main_window_load(Window *window) {
   // set up time display layer
   time_layer = text_layer_create(
       GRect(0, 63, bounds.size.w, 36));
-  text_layer_set_background_color(time_layer, GColorDarkGray);
+  text_layer_set_background_color(time_layer, GColorClear);
   text_layer_set_text_color(time_layer, GColorWhite);
   text_layer_set_text(time_layer, "00:00");
   text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_LECO_28_LIGHT_NUMBERS));
   text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(time_layer));
   
-  // set up layer and draw initial ring
+  // set up counter layer and draw initial ring
   draw_layer = layer_create(GRect(0, 0, 144, 168));
 	layer_set_update_proc(draw_layer, updateScreen);
 	layer_add_child(window_layer, draw_layer);
-  layer_mark_dirty(draw_layer);
+  update_counter();
 }
 
 static void main_window_unload(Window *window) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "D: time_layer");
   text_layer_destroy(time_layer);
-  
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "D: bg_layer");
   text_layer_destroy(bg_layer);
-  
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "D: draw_layer");
   layer_destroy(draw_layer);
 }
 
@@ -119,7 +107,6 @@ void handle_init(void) {
 }
 
 void handle_deinit(void) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "D: main_window");
   window_destroy(main_window);
 }
 
