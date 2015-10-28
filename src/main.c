@@ -82,6 +82,7 @@ static void main_window_load(Window *window) {
 
   int arc_slices = (int)end_time - (int)start_time;
   counter_config = create_arc_config(arc_slices);
+  set_arc_offset(&counter_config, -angle_90);
   update_counter();
 }
 
