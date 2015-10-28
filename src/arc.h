@@ -3,7 +3,7 @@
 
 struct arc {
   int num_slices;
-  int arc_offset;
+  int offset;
   int start_angle;
   int end_angle;
   int current_step;

@@ -9,7 +9,7 @@ static struct arc create_arc_config(int num_slices) {
   
     struct arc config = {
     .num_slices = num_slices,
-    .arc_offset = -angle_90,
+    .offset = 0,
     .start_angle = 0,
     .end_angle = 0,
     .current_step = 0,
@@ -34,6 +34,12 @@ static void set_arc_step(struct arc *config, int step) {
 // Updates the end point of the arc based on number of slices and current step
 static void update_arc_end_angle(struct arc *config) {
   config->end_angle = config->step_angle * config->current_step;
+}
+
+// Sets an offset (in number of slices) to apply to the arc
+// Example: -TRIG_MAX_ANGLE / 4 will rotate the arc 90 degrees counter clockwise
+static void set_arc_offset(struct arc *config, int offset) {
+  config->offset= offset;
 }
 
 // Based on DrawArc function thanks to Cameron MacFarland (http://forums.getpebble.com/profile/12561/Cameron%20MacFarland)
@@ -153,6 +159,6 @@ static void custom_draw_arc(GContext *ctx, GPoint center, int radius, int thickn
 }
 
 static void custom_draw_arc_from_config(GContext *ctx, GPoint center, int radius, int thickness, struct arc config, GColor c) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "CDAFC: %d, %d", config.start_angle + config.arc_offset, config.end_angle + config.arc_offset);
-  custom_draw_arc(ctx, center, radius, thickness, config.start_angle + config.arc_offset, config.end_angle + config.arc_offset, c);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "CDAFC: %d, %d", config.start_angle + config.offset, config.end_angle + config.offset);
+  custom_draw_arc(ctx, center, radius, thickness, config.start_angle + config.offset, config.end_angle + config.offset, c);
 }
