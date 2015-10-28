@@ -55,10 +55,6 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void main_window_load(Window *window) {
-  // set up arc config
-  int arc_slices = (int)end_time - (int)start_time;
-  counter_config = create_arc_config(arc_slices);
-  
   // get information about the Window
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -83,6 +79,9 @@ static void main_window_load(Window *window) {
   draw_layer = layer_create(GRect(0, 0, 144, 168));
 	layer_set_update_proc(draw_layer, updateScreen);
 	layer_add_child(window_layer, draw_layer);
+
+  int arc_slices = (int)end_time - (int)start_time;
+  counter_config = create_arc_config(arc_slices);
   update_counter();
 }
 
