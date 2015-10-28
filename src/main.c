@@ -50,8 +50,8 @@ static void update_counter() {
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
 
-  // todo: update only on day change
-  update_counter();
+  if (units_changed = DAY_UNIT)
+    update_counter();
 }
 
 static void main_window_load(Window *window) {
